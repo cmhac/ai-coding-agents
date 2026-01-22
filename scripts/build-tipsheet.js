@@ -5,6 +5,7 @@ import { marked } from "marked";
 import { dirname } from "path";
 import { fileURLToPath } from "url";
 import { join } from "path";
+import puppeteer from "puppeteer";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const rootDir = join(__dirname, "..");
@@ -39,5 +40,28 @@ mkdirSync(join(rootDir, "dist"), { recursive: true });
 
 // Write the HTML file
 writeFileSync(join(rootDir, "dist/tipsheet.html"), html);
+console.log("✓ Tipsheet HTML built successfully");
 
-console.log("✓ Tipsheet built successfully");
+// Generate PDF
+const browser = await puppeteer.launch({
+  headless: true,
+  args: ["--no-sandbox", "--disable-setuid-sandbox"],
+});
+
+const page = await browser.newPage();
+await page.setContent(html, { waitUntil: "networkidle0" });
+
+await page.pdf({
+  path: join(rootDir, "dist/tipsheet.pdf"),
+  format: "Letter",
+  margin: {
+    top: "0.5in",
+    right: "0.5in",
+    bottom: "0.5in",
+    left: "0.5in",
+  },
+  printBackground: true,
+});
+
+await browser.close();
+console.log("✓ Tipsheet PDF built successfully");
