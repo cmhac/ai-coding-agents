@@ -15,7 +15,12 @@
     "dev": "marp --preview --allow-local-files presentation.md",
     "watch": "marp --watch --allow-local-files presentation.md -o dist/presentation.pptx",
     "server": "marp --server ./",
-    "clean": "rm -rf dist"
+    "clean": "rm -rf dist",
+    "lint": "eslint \"**/*.{js,mjs}\"",
+    "lint:fix": "eslint \"**/*.{js,mjs}\" --fix",
+    "format": "prettier --write \"**/*.{js,mjs,json,md,css}\"",
+    "check-build": "node scripts/check-build.js",
+    "prepare": "husky"
   },
   "keywords": [
     "marp",
@@ -28,8 +33,23 @@
   "license": "ISC",
   "devDependencies": {
     "@marp-team/marp-cli": "^4.2.3",
+    "eslint": "^9.39.2",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.5",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7",
     "marked": "^17.0.1",
     "marked-cli": "^0.3.1",
+    "prettier": "^3.8.1",
     "puppeteer": "^24.36.0"
+  },
+  "lint-staged": {
+    "*.{js,mjs}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md,css}": [
+      "prettier --write"
+    ]
   }
 }

@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@300;400;600;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@300;400;600;700&display=swap");
 
 * {
   margin: 0;
@@ -7,7 +7,11 @@
 }
 
 body {
-  font-family: 'Libre Franklin', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family:
+    "Libre Franklin",
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
   font-optical-sizing: auto;
   line-height: 1.7;
   color: #1a1a1a;
@@ -66,7 +70,8 @@ p {
   font-size: 1rem;
 }
 
-ul, ol {
+ul,
+ol {
   margin-bottom: 1.25rem;
   margin-left: 2rem;
 }
@@ -80,7 +85,7 @@ code {
   background-color: #f0f0f0;
   padding: 0.25rem 0.5rem;
   border-radius: 3px;
-  font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
+  font-family: "Monaco", "Menlo", "Consolas", monospace;
   font-size: 0.88em;
   color: #2a5a8a;
   border: 1px solid #e0e0e0;
@@ -94,7 +99,7 @@ pre {
   overflow-x: auto;
   margin-bottom: 1.5rem;
   border: 1px solid #333;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   line-height: 1.5;
 }
 
@@ -148,21 +153,22 @@ body::after {
     padding: 1rem;
     background-color: white;
   }
-  
+
   h1 {
     page-break-after: avoid;
     box-shadow: none;
   }
-  
-  h2, h3 {
+
+  h2,
+  h3 {
     page-break-after: avoid;
   }
-  
+
   pre {
     page-break-inside: avoid;
     box-shadow: none;
   }
-  
+
   a {
     color: #2a5a8a;
     text-decoration: underline;
@@ -173,16 +179,16 @@ body::after {
   body {
     padding: 1.5rem 1rem;
   }
-  
+
   h1 {
     font-size: 2rem;
     padding: 1rem;
   }
-  
+
   h2 {
     font-size: 1.5rem;
   }
-  
+
   h3 {
     font-size: 1.15rem;
   }

@@ -1,4 +1,4 @@
-import { defineConfig } from "@marp-team/marp-cli"
+import { defineConfig } from "@marp-team/marp-cli";
 
 export default defineConfig({
   // Engine options
@@ -28,4 +28,4 @@ export default defineConfig({
   description: "A comprehensive presentation about AI-powered coding agents",
   author: "Your Name",
   keywords: ["AI", "Coding", "Agent Mode", "Copilot", "Development"],
-})
+});
