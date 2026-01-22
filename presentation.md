@@ -249,6 +249,13 @@ Mostly vibes-based
 
 ---
 
+# For bigger changes, watch for the LLM doing "backwards compatibility"
+
+- When making large changes or working on bigger codebases, the AI might try to preserve old behavior unnecessarily.
+- I've found it often needs to be explicitly told not to worry about backwards compatibility.
+
+---
+
 # Start new conversations often
 
 - Frequently create new conversations with the AI to keep context fresh and avoid confusion.
@@ -312,3 +319,117 @@ repos:
       entry: pytest
       language: python
 ```
+
+---
+
+Copy/paste detection can catch AI agents not writing DRY code.
+
+```yaml
+- repo: local
+  hooks:
+    - id: cpd
+      name: Copy/Paste Detector
+      language: system
+      entry: pmd cpd --minimum-tokens 100 --language python -d src
+```
+
+---
+
+# Case study: Refactoring a data pipeline
+
+- I built a data pipeline to scrape files from a government meeting hosting platform, process them, and do some analysis.
+- The initial version worked, but had a critical performance bottleneck that made it hard to maintain and scale.
+- I used an AI coding agent to refactor the pipeline for better performance and modularity.
+
+---
+
+# Prompt
+
+This is the prompt I gave the AI coding agent to refactor the pipeline:
+
+```
+Review the following files:
+#file:models.py #file:download.py #file:download_files.py #file:cli.py
+
+We are currently using the following pattern for this pipeline:
+
+1. discover subdomains
+2. fan out per subdomain, discovering clips and downloading all files in one go for multiple domains
+3. post-download processing (you can ignore this for now)
+4. analysis (you can ignore this for now)
+
+I want to further optimize our pipeline by separating the domain-level clip discovery and file downloads into separate steps. We should first discover the subdomains as we currently do, then fan out and do clip discovery for a batch of domains, then have a new worker do file downloads for a batch of files, regardless of domain.
+
+you'll need to modify the tasks, worker code, cli, as well as models. Pay special attention to the model code as we will need to track the s3 location for each file if one was downloaded, as well as its download status (i.e. whether a download attempt was made for it), and whether that download was successful.
+
+We currently do some storing of metadata in a json file in s3 if pages redirect. we should also store this in the database instead and only save the actual desired file to s3.
+
+We currently handle downloads for agenadas, minutes, and transcripts primarily. There is currently handling for other document types, but you can please remove those for now.
+
+Do not worry about backward compatibility for these changes; if something breaks the old api or interface, that is okay as we are in an early development stage. Also do not worry about backfilling existing data as in this early development stage I will clear out the database and s3 bucket once you make these changes.
+
+There may now be duplicated logic across tasks. if that is the case, create functions in src/core/utils.py tha can be used by multiple tasks. ensure any shared utils do not contain task-specific code of any kind.
+```
+
+---
+
+## Initial reasoning and todo creation
+
+The AI agent reviewed the necessary code, then broke down the task into a series of smaller steps:
+
+<!-- ![](img/case-study/1-planning.png) -->
+<img src="img/case-study/1-planning.png" style="margin: 0 auto; width:450px" />
+
+---
+
+## Implementation
+
+The agent wrote code to implement each step of the plan, including database migrations, task refactoring, and utility function creation.
+
+<!-- ![](img/case-study/2-execution.png) -->
+<img src="img/case-study/2-execution.png" style="margin: 0 auto; width:650px" />
+
+---
+
+## Quick tests
+
+The agent ran quick tests to verify each part worked as expected before moving on.
+
+<!-- ![](img/case-study/3-validation.png) -->
+<img src="img/case-study/3-validation.png" style="margin: 0 auto; width:600px" />
+
+That fixed some issues in the code automatically:
+
+<img src="img/case-study/4-validation-fixes.png" style="margin: 0 auto; width:600px" />
+
+---
+
+## Additional checks
+
+Without being prompted, the agent ran a terminal command to check basic functionality of the code:
+
+<img src="img/case-study/5-additional-checks.png" style="margin: 0 auto; width:600px" />
+
+---
+
+## Usage checks
+
+The agent ran the `--help` command for my project's CLI to ensure the interface was still working as expected:
+
+<img src="img/case-study/6-usage-test.png" style="margin: 0 auto; width:600px" />
+
+---
+
+## Unit tests
+
+These changes required significant changes to the existing unit tests. The agent updated the tests to match the new code structure and logic.
+
+<img src="img/case-study/7-unit-tests.png" style="margin: 0 auto; width:500px" />
+
+---
+
+## Test fixes
+
+Because those were big changes, some tests failed initially. The agent reviewed the failures, then updated the tests to match the new expected behavior.
+
+<img src="img/case-study/8-test-fixes.png" style="margin: 0 auto; width:500px" />
