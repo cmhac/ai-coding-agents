@@ -2,14 +2,16 @@
   "name": "2025-08-agent-mode-presentation",
   "version": "1.0.0",
   "description": "Presentation about Agentic Coding Tools and Agent Mode",
+  "type": "module",
   "main": "index.js",
   "scripts": {
     "build:html": "marp presentation.md --allow-local-files --html -o dist/index.html",
     "build:pdf": "marp presentation.md --allow-local-files --pdf -o dist/presentation.pdf",
     "build:pptx": "marp presentation.md --allow-local-files --pptx -o dist/presentation.pptx",
     "build:pptx:editable": "marp presentation.md --pptx-editable --allow-local-files -o dist/presentation-editable.pptx",
+    "build:tipsheet": "node scripts/build-tipsheet.js",
     "build:all-formats": "npm run build:html && npm run build:pdf && npm run build:pptx",
-    "build:pages": "npm run build:html && cp -r img dist/ && cp -r themes dist/",
+    "build:pages": "npm run build:html && npm run build:tipsheet && cp -r img dist/ && cp -r themes dist/",
     "dev": "marp --preview --allow-local-files presentation.md",
     "watch": "marp --watch --allow-local-files presentation.md -o dist/presentation.pptx",
     "server": "marp --server ./",
@@ -25,6 +27,8 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "@marp-team/marp-cli": "^4.2.3"
+    "@marp-team/marp-cli": "^4.2.3",
+    "marked": "^17.0.1",
+    "marked-cli": "^0.3.1"
   }
 }
