@@ -38,6 +38,7 @@ Keep this file as brief as possible; the longer it is, the less likely agents ar
 ### Be Explicit and Directive
 
 ❌ "My API call to fetch data from the server is failing. Can you help?"
+
 ✅ "The file `dataFetcher.js` contains a function `fetchData()`. It throws a 500 error when called. Run the command `node dataFetcher.js` to reproduce. Fix the function to handle server errors gracefully by retrying up to 3 times with exponential backoff using the `axios-retry` library."
 
 - Give clear directives, not just problem descriptions
