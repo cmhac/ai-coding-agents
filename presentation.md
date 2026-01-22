@@ -14,11 +14,11 @@ transition: fade
 
 ---
 
-# What is Agent Mode?
+# What is a coding agent?
 
 <!-- _class: invert -->
 
-An AI coding assistant mode where you **describe a high-level task** and the AI autonomously plans and applies the needed code changes across your project.
+An AI coding assistant mode where you **describe a high-level task** and the AI autonomously plans, implements, and tests the code across your project.
 
 ---
 
@@ -32,11 +32,11 @@ An AI coding assistant mode where you **describe a high-level task** and the AI 
 
 ---
 
-# How Agent Mode Works
+# How AI coding agents work
 
-Agent mode can take more complex multi-step actions than tab completions or regular ChatGPT.
+AI coding agents can take more complex multi-step actions than tab completions or regular ChatGPT.
 
-It has access to your entire codebase, and can run terminal commands and use various tools to see the output of our code and check for errors.
+They can access your entire codebase , can run terminal commands and can use various tools to see the output of your code and check for errors.
 
 ---
 
@@ -57,50 +57,87 @@ It has access to your entire codebase, and can run terminal commands and use var
 
 # MCP Servers
 
-MCP (model context protocol) is standard way for agents to connect to external data and tools. They give agents groups of tools to work with.
+MCP (model context protocol) is standard way for AI coding agents to connect to external data and tools. They give agents groups of tools to work with. For example:
+
+- File system access
+- Terminal commands
+- Web browsing
+- Sub-agent delegation
+- Testing frameworks
 
 ---
 
 # The Context Problem
 
-LLMs can handle huge context, but too much slows them down.
+LLMs have a "context window" — the maximum amount of token data they can consider at once.
 
-The solution:
+When context windows fill, LLMs lose track of important info, leading to mistakes.
+
+---
+
+# Information in the middle of the context window gets lost
+
+![](img/lost-in-the-middle.png)
+
+---
+
+# The solution
 
 - Give the agents lots of info they do need
 - Minimize irrelevant context
 
----
-
-# Rules
-
-Custom instructions injected into agent's context to control behavior.
-
-Can be provided for all requests, or based on certain files and conditions.
+Coding agents provide techniques to do this.
 
 ---
 
-# Example rule: test-driven development
+# AGENTS.md
 
-![](img/rules/TDD.png)
+`AGENTS.md` is a new-ish standard for configuring AI coding agents in a project. Its context is injected to the agent's prompt whenever it works on the project,
+allowing you to provide high-level instructions, preferences, and project details.
 
----
-
-# Example rule: GitHub Usage
-
-![GitHub usage rule](img/rules/GitHub%20usage.png)
+`AGENTS.md` works across AI coding agent platforms including GitHub Copilot, Codex, Cursor, etc.
 
 ---
 
-# Modes
+```
+# Project instructions for AI coding agents
 
-Provide task-specific instructions and toolsets. Agent mode is the default, but you can create custom modes for specific workflows.
+This repository contains data processing and analysis scripts for the Washington Post's work on loss of farmland in the U.S.
+
+## Project structure
+
+- `data/raw/`: Raw input data files (shapefiles, raster files, etc.)
+- `data/clean/`: Cleaned and processed data files
+- `scripts/import/`: Scripts for downloading and importing raw data
+- `scripts/transformation/`: Scripts for transforming and processing data
+- `scripts/analysis/`: Scripts and notebooks for analyzing processed data
+- `scripts/markdown`: .qmd files for generating markdown reports
+
+## Python environment
+
+- `uv` package manager
+- Dependencies defined in `pyproject.toml`
+- Use `uv add <package>` to add new packages
+- `snakemake` for workflow management, workflow defined in root `Snakefile`. Run with `uv run snakemake`
+- `pre-commit` for code quality checks, configured in `.pre-commit-config.yaml`
+- After modifying code, run `uv run pre-commmit run --files <modified files>` to check code quality before stopping
+
+## Critical constraints
+
+- This pipeline can take several hours to run end-to-end. Do NOT run the full pipeline with `--forceall` without explicit permission.
+```
 
 ---
 
-# Example mode: inline documentation maintainer
+# Skills
 
-![inline documentation maintainer](img/modes/inline-documenter.png)
+Skills provide task-specific instructions and sets of tools. They let you customize agent behavior for different scenarios, beyond just project-level instructions.
+
+---
+
+# Example skill: inline documentation maintainer
+
+![inline documentation maintainer](img/skills/inline-documenter.png)
 
 ---
 
@@ -117,17 +154,53 @@ Agents get toolsets from MCP servers, which can be configured into various modes
 
 ---
 
+# Context7: MCP server that allows agents to fetch documentation
+
+- Context7 is a hosted MCP server that lets agents access documentation in an LLM-friendly format.
+- It has a nearly-comprehensive library of popular libraries in many languages
+
+```
+{
+  "servers": {
+    "context7": {
+      "url": "https://mcp.context7.com/mcp"
+    }
+  }
+}
+```
+
+---
+
+# Example MCP server: Playwright
+
+```
+{
+  "mcpServers": {
+    "playwright": {
+      "command": "npx",
+      "args": [
+        "@playwright/mcp@latest"
+      ]
+    }
+  }
+}
+```
+
+---
+
 # Best Practices
 
 ✅ **Start simple** → Basic rules first
 
-✅ **Set boundaries** → Control what agents can do
+✅ **Set boundaries** → Use tests and code quality gates to enforce standards
 
 ✅ **Iterate** → Refine rules based on results
 
 ---
 
 # **Tips for Effective Agent Interaction**
+
+Mostly vibes-based
 
 ---
 
@@ -185,20 +258,57 @@ Agents get toolsets from MCP servers, which can be configured into various modes
 
 # Set guardrails
 
-- Use `pre-commit hooks` to enforce code quality standards and prevent issues before they're committed.
-- Always always always use linters and formatters and their corresponding VS Code extensions — agents can read the outputs of VS Code linters!!
-- Use code quality tools like `sonarqube` to monitor for best practices
+- Using good coding practices like linters, formatters, type checkers, and tests can help enforce standards and catch mistakes.
+- You can tell the AI agent to run these tools after making changes (I put this instruction in my `AGENTS.md` files).
 
 ---
 
-# For now, avoid Jupyter Notebooks for complex changes
+# Example pre-commit hooks
 
-- Jupyter notebooks require maintaining state across cells, which can be challenging for the AI to track.
-- They also require additional tool calls in order to work.
-- Move complex code out of the notebook into scripts or modules, then import them.
+```yaml
+repos:
+  # Lint and format Python code using Ruff.
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    # Ruff version.
+    rev: v0.14.10
+    hooks:
+      # Run the linter.
+      - id: ruff-check
+        types_or: [python, pyi]
+        args: [--fix]
+      # Run the formatter.
+      - id: ruff-format
+        types_or: [python, pyi]
+
+  # Format Snakefiles
+  - repo: https://github.com/snakemake/snakefmt
+    rev: v0.11.2
+    hooks:
+      - id: snakefmt
+```
 
 ---
 
-# Use the right model
+```yaml
+# Enforce Jupyter notebook cell execution order.
+- repo: https://github.com/cmhac/enforce-notebook-run-order
+  rev: 2.1.1
+  hooks:
+    - id: enforce-notebook-run-order
 
-Claude 4 Sonnet or GPT-5.
+# run type checking
+- repo: local
+  hooks:
+    - id: ty
+      name: ty check
+      entry: ty check .
+      language: python
+
+# Run unit tests with pytest
+- repo: local
+  hooks:
+    - id: pytest
+      name: pytest
+      entry: pytest
+      language: python
+```
